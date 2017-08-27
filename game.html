@@ -26,6 +26,7 @@
           myGameArea.obstacles = [];
           myGameArea.score = new textComponent("30px", "Consolas", "black", 380, 40, "text");
           document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+          clearInterval(this.interval);
           this.interval = setInterval(this.update, 20);
         },
         clear : function() {
@@ -170,6 +171,14 @@
             break;
         }
       });
+      $(document).ready(function() {
+        $("#start").click(function(e) {
+          e.preventDefault();
+          startGame();
+        });
+      });
     </script>
+    <br />
+    <button id="start">Restart</button>
   </body>
 </html>
