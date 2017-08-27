@@ -22,6 +22,8 @@
           this.canvas.height = 400;
           this.context = this.canvas.getContext("2d");
           myGameArea.myGameObject = new gameObject(30, 30, "red", 10, 120);
+          myGameArea.frameNo = 0;
+          myGameArea.obstacles = [];
           document.body.insertBefore(this.canvas, document.body.childNodes[0]);
           this.interval = setInterval(this.update, 20);
         },
@@ -29,8 +31,31 @@
           this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         },
         update : function() {
+          if (myGameArea.myGameObject.isDied) {
+            return;
+          }
           myGameArea.clear();
+          myGameArea.frameNo += 1;
+          if (myGameArea.frameNo % 150 == 1) {myGameArea.addObstacle()}
+          for (i = 0; i < myGameArea.obstacles.length; i += 1) {
+            myGameArea.obstacles[i].x += -1;
+            myGameArea.obstacles[i].update();
+          }
+          myGameArea.myGameObject.move();
           myGameArea.myGameObject.update();
+        },
+        addObstacle : function() {
+          canvasWidth = myGameArea.canvas.width;
+          canvasHeight = myGameArea.canvas.height;
+          minHeight = 20;
+          maxHeight = 200;
+          height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+          minGap = 50;
+          maxGap = 200;
+          gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+          myGameArea.obstacles.push(new gameObject(10, height, "green", canvasWidth, 0));
+          myGameArea.obstacles.push(
+            new gameObject(10, canvasHeight - height - gap, "green", canvasWidth, height + gap));
         }
       }
 
@@ -79,10 +104,26 @@
           return false;
         }
 
+        this.crashWith = function(other) {
+          var crash = true;
+          if (
+            (this.bottom() < other.top()) || (this.top() > other.bottom()) ||
+            (this.right() < other.left()) || (this.left() > other.right())
+          ) {
+            crash = false;
+          }
+          return crash;
+        }
+
         this.checkCrash = function() {
           if (this.moveOutOfArea()) {
             this.isDied = true;
             return;
+          }
+          for (i = 0; i < myGameArea.obstacles.length; i += 1) {
+            if (this.crashWith(myGameArea.obstacles[i])) {
+              this.isDied = true;
+            }
           }
         }
       }
